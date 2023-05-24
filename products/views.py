@@ -11,11 +11,16 @@ from products.serializers import ProductSerializer
 # Create your views here.
 
 class ProductListAPIView(APIView):
-    queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
+    def get(self, request):
+        product = Product.objects.all()
+        serializer = self.serializer_class(product, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     def post(self, request):
-        serializer = self.serializer_class(request.data)
+        serializer = self.serializer_class(data=request.data)
 
         if serializer.is_valid():
             serializer.save()
