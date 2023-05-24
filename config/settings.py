@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 from environs import Env
+from datetime import timedelta
+
 
 # Environment variables
 env = Env()
@@ -47,8 +49,10 @@ INSTALLED_APPS = [
     # external apps
     'rest_framework',
     'django_filters',
+    'knox',
 
     # internal apps
+    'accounts.apps.AccountsConfig',
 ]
 
 MIDDLEWARE = [
@@ -137,6 +141,10 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
+# Default settings
+AUTH_USER_MODEL = 'accounts.CustomUser'
+
+
 # Django Rest Framework Settings
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
@@ -160,10 +168,12 @@ REST_FRAMEWORK = {
     ],
 
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        # Session authentication
-        # 'rest_framework.authentication.TokenAuthentication',
-        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+        'knox.auth.TokenAuthentication',
     ]
+}
+
+
+REST_KNOX = {
+    'USER_SERIALIZER': 'accounts.serializers.UserSerializer',
+    'TOKEN_TTL': timedelta(hours=48),
 }
