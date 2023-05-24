@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate
+from django.contrib.auth.password_validation import validate_password
 
 from rest_framework import serializers
 
@@ -14,23 +15,34 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class CreateUserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(style={'input_type': 'password'}, validators=[validate_password])
+    password2 = serializers.CharField(style={'input_type': 'password'})
+
     class Meta:
         model = CustomUser
-        fields = '__all__'
+        fields = ['username', 'email', 'password', 'password2']
         extra_kwargs = {
-            'password': {'required': True}
+            'password': {'required': True},
+            'password2': {'required': True},
         }
-    
+
     def validate(self, attrs):
         email = attrs.get('email', '').strip().lower()
 
         if CustomUser.objects.filter(email=email).exists():
             raise serializers.ValidationError('User with this email id already exists.')
 
+        if attrs['password'] != attrs['password2']:
+            raise serializers.ValidationError({"password": "Password fields didn't match."})
+
         return attrs
 
     def create(self, validated_data):
-        user = CustomUser.objects.create_user(**validated_data)
+        user = CustomUser.objects.create(
+            username=validated_data['username'],
+            email=validated_data['email'],
+        )
+        user.set_password(validated_data['password'])
         return user
 
 
