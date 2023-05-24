@@ -1,4 +1,4 @@
-from django.http.response import Http404
+from django.http import Http404
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -11,15 +11,11 @@ from products.serializers import ProductSerializer
 # Create your views here.
 
 class ProductListAPIView(APIView):
+    queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
-    def get(self, request, format=None):
-        product = Product.objects.all()
-        serializer = self.serializer_class(product, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def post(self, request, format=None):
-        serializer = self.serializer_class(data=request.data)
+    def post(self, request):
+        serializer = self.serializer_class(request.data)
 
         if serializer.is_valid():
             serializer.save()
@@ -37,15 +33,15 @@ class ProductDetailAPIView(APIView):
         except Product.DoesNotExist:
             raise Http404
 
-    def get(self, request, pk, format=None):
+    def get(self, request, pk):
         product = self.get_object(pk)
         serializer = self.serializer_class(product)
 
         return Response(serializer.data)
 
-    def put(self, request, pk, format=None):
+    def put(self, request, pk):
         product = self.get_object(pk)
-        serializer = self.serializer_class(product, data=request.data)
+        serializer = self.serializer_class(product, request.data)
 
         if serializer.is_valid():
             serializer.save()
@@ -53,7 +49,7 @@ class ProductDetailAPIView(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, pk, format=None):
+    def delete(self, request, pk):
         product = self.get_object(pk)
         product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
