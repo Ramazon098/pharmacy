@@ -16,14 +16,12 @@ class UserSerializer(serializers.ModelSerializer):
 
 class CreateUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(style={'input_type': 'password'}, validators=[validate_password])
-    password2 = serializers.CharField(style={'input_type': 'password'})
 
     class Meta:
         model = CustomUser
-        fields = ['username', 'email', 'password', 'password2']
+        fields = ['username', 'email', 'password']
         extra_kwargs = {
             'password': {'required': True},
-            'password2': {'required': True},
         }
 
     def validate(self, attrs):
@@ -31,9 +29,6 @@ class CreateUserSerializer(serializers.ModelSerializer):
 
         if CustomUser.objects.filter(email=email).exists():
             raise serializers.ValidationError('User with this email id already exists.')
-
-        if attrs['password'] != attrs['password2']:
-            raise serializers.ValidationError({"password": "Password fields didn't match."})
 
         return attrs
 
@@ -63,7 +58,7 @@ class UpdateUserSerializer(serializers.ModelSerializer):
 
 class LoginUserSerializer(serializers.Serializer):
     email = serializers.EmailField()
-    password = serializers.CharField(style={'input_type': 'password'}, trim_whitespace=False)
+    password = serializers.CharField(style={'input_type': 'password'})
 
     def validate(self, attrs):
         email = attrs.get('email').lower()

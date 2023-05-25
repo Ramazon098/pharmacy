@@ -1,14 +1,20 @@
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 
+from rest_framework.views import APIView
 from rest_framework.generics import CreateAPIView, UpdateAPIView, ListAPIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
 from knox.views import LoginView
 
 from accounts.models import CustomUser
-from accounts.serializers import UserSerializer, CreateUserSerializer, UpdateUserSerializer, LoginUserSerializer
+from accounts.serializers import (
+    UserSerializer,
+    CreateUserSerializer,
+    UpdateUserSerializer,
+    LoginUserSerializer,
+)
 
 
 # Create your views here.
@@ -16,6 +22,7 @@ from accounts.serializers import UserSerializer, CreateUserSerializer, UpdateUse
 class UsersViewAPI(ListAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [AllowAny,]
 
 
 class CreateUserAPI(CreateAPIView):
@@ -27,20 +34,30 @@ class CreateUserAPI(CreateAPIView):
 class UpdateUserAPI(UpdateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UpdateUserSerializer
+    permission_classes = [IsAuthenticated,]
 
 
 class LoginUserAPI(LoginView):
     permission_classes = [AllowAny,]
     serializer_class = LoginUserSerializer
 
-    def post(self, request, format=None):
-        serializer = self.serializer_class(data=request.data)
+    def post(self, request):
+        serializer = self.serializer_class(
+            data=request.data,
+            context={'request': request},
+        )
 
-        if serializer.is_valid(raise_exception=True):
+        if serializer.is_valid():
             user = serializer.validated_data['user']
             login(request, user)
-            response = super().post(request, format=None)
-        else:
-            return Response({'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
-        return Response(response.data, status=status.HTTP_200_OK)
+        return Response({'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LogoutAPI(APIView):
+    permission_classes = [IsAuthenticated,]
+
+    def get(self, request):
+        logout(request)
+        return Response(None, status=status.HTTP_204_NO_CONTENT)

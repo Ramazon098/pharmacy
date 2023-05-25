@@ -1,8 +1,6 @@
 from django.urls import path
 
-from knox.views import LogoutView, LogoutAllView
-
-from accounts.views import UsersViewAPI, CreateUserAPI, UpdateUserAPI, LoginUserAPI
+from accounts.views import UsersViewAPI, CreateUserAPI, UpdateUserAPI, LoginUserAPI, LogoutAPI
 
 
 # Create your urls here.
@@ -12,6 +10,5 @@ urlpatterns = [
     path('create-user/', CreateUserAPI.as_view()),
     path('update-user/<int:pk>/', UpdateUserAPI.as_view()),
     path('login/', LoginUserAPI.as_view()),
-    path('logout/', LogoutView.as_view()),
-    path('logout-all/', LogoutAllView.as_view()),
+    path('logout/', LogoutAPI.as_view()),
 ]
