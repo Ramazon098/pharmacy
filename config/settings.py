@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'knox',
+    'drf_spectacular',
 
     # internal apps
     'accounts.apps.AccountsConfig',
@@ -151,6 +152,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': None,
 
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
     ),
@@ -173,4 +176,9 @@ REST_FRAMEWORK = {
 REST_KNOX = {
     'USER_SERIALIZER': 'accounts.serializers.UserSerializer',
     'TOKEN_TTL': timedelta(hours=48),
+}
+
+
+SPECTACULAR_SEETINGS = {
+    'TITLE': 'Parmacy API Documentation',
 }
