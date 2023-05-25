@@ -1,6 +1,8 @@
 from django.http import Http404
 
 from rest_framework.views import APIView
+from rest_framework.generics import ListAPIView
+from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -58,3 +60,10 @@ class ProductDetailAPIView(APIView):
         product = self.get_object(pk)
         product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SearchProductAPIView(ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    filter_backends = [SearchFilter]
+    search_fields = ['title', 'price']
